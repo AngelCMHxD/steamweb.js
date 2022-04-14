@@ -1,1 +1,1 @@
-module.exports = require("./src/Client.js");
+module.exports.SteamWeb = require("./src/SteamWeb.js");
