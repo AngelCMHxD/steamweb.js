@@ -91,7 +91,19 @@ declare module "steamweb.js" {
 			}>;
 		}>;
 
-		getRecentlyPlayedGames(userId: string, count?: number): Promise<Array<>>;
+		getRecentlyPlayedGames(userId: string, count?: number): Promise<{
+			gameCount: number;
+			games: Array<{
+				appId: game.appid,
+				name: game.name,
+				playtimeForever: game.playtime_forever,
+				playtime2Weeks: game.playtime_2weeks,
+				imgIconUrl: `http://media.steampowered.com/steamcommunity/public/images/apps/${game.appid}/${game.img_icon_url}.jpg`,
+				playtimeWindowsForever: game.playtime_windows_forever,
+				playtimeMacForever: game.playtime_mac_forever,
+				playtimeLinuxForever: game.playtime_linux_forever
+			}>
+		}>;
 
 	}
 }
