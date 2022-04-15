@@ -13,7 +13,23 @@ class SteamWeb {
 		if (typeof appId !== "string") throw new TypeError(`Expected "string", got "${typeof appId}"`)
 
 		const res = await fetch(this.endpoint + `ISteamNews/GetNewsForApp/v0002/?appid=${appId}&count=${count}&maxlength=${maxLength}`).then(response => { return response.json() })
-		return res.appnews.newsitems
+		let news = [];
+		res.appnews.newsitems.forEach(item => {
+			news.push({
+				gId: item.gid,
+				title: item.title,
+				url: item.url,
+				isExternalUrl: item.is_external_url,
+				author: item.author,
+				contents: item.contents,
+				feedLabel: item.feedlabel,
+				date: new Date(item.date * 1000),
+				feedName: item.feedname,
+				feedType: item.feed_type,
+				appId: toString(item.appid)
+			})
+		})
+		return news
 
 	}
 
@@ -53,12 +69,12 @@ class SteamWeb {
 				personaHash: player.personahash,
 				realname: player.realname,
 				primaryClanId: player.primaryclanid,
-				lastLogOff: player.lastlogoff,
-				timecreated: player.timecreated,
-				personastateflags: player.personastateflags,
-				loccountrycode: player.loccountrycode,
-				locstatecode: player.locstatecode,
-				loccityid: player.loccityid,
+				lastLogOff: player.lastlogoff ? new Date(player.lastlogoff * 1000) : undefined,
+				timeCreated: player.timecreated ? new Date(player.timecreated * 1000) : undefined,
+				personaStateFlags: player.personastateflags,
+				locCountryCode: player.loccountrycode,
+				locStateCode: player.locstatecode,
+				locCityId: player.loccityid,
 			}
 		} else if (typeof userId === "object" && checkArray(userId)) {
 			var idArray = []
@@ -84,12 +100,12 @@ class SteamWeb {
 					personaHash: player.personahash,
 					realname: player.realname,
 					primaryClanId: player.primaryclanid,
-					lastLogOff: player.lastlogoff,
-					timecreated: player.timecreated,
-					personastateflags: player.personastateflags,
-					loccountrycode: player.loccountrycode,
-					locstatecode: player.locstatecode,
-					loccityid: player.loccityid,
+					lastLogOff: player.lastlogoff ? new Date(player.lastlogoff * 1000) : undefined,
+					timeCreated: player.timecreated ? new Date(player.timecreated * 1000) : undefined,
+					personaStateFlags: player.personastateflags,
+					locCountryCode: player.loccountrycode,
+					locStateCode: player.locstatecode,
+					locCityId: player.loccityid,
 				})
 			})
 			return players
@@ -115,7 +131,7 @@ class SteamWeb {
 		let friends = [];
 		res.friendslist.friends.forEach(user => {
 			friends.push({
-				steamid: user.steamid,
+				steamId: user.steamid,
 				friendsSince: user.friend_since === 0 ? undefined : user.friend_since
 			})
 		})
@@ -123,7 +139,7 @@ class SteamWeb {
 
 	}
 
-	async getPlayerAchievements(userId, appId, lang = "en") {
+	async getPlayerAchievements(userId, appId, filterByAchieved = false, lang = "en") {
 
 		if (typeof userId !== "string") throw new TypeError(`Expected "string", got "${typeof userId}"`)
 		if (typeof appId !== "string") throw new TypeError(`Expected "string", got "${typeof appId}"`)
@@ -139,12 +155,13 @@ class SteamWeb {
 
 		let achievements = [];
 		res.playerstats.achievements.forEach(achievement => {
+			if (filterByAchieved && achievement.achieved === 0) return
 			achievements.push({
 				name: achievement.name,
 				description: achievement.description,
 				apiName: achievement.apiname,
 				achieved: achievement.achieved === 1,
-				unlockTime: achievement.unlocktime === 0 ? undefined : achievement.unlocktime
+				unlockTime: achievement.unlocktime ? new Date(achievement.unlocktime * 1000) : null
 			})
 		})
 		return achievements
