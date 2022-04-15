@@ -61,7 +61,7 @@ declare module "steamweb.js" {
 
 		getFriendList(userId: string): Promise<Array<{
 			steamId: string;
-			friendsSince: number;
+			friendsSince: Date | null;
 		}> | false>;
 
 		getPlayerAchievements(userId: string, appId: string, filterByAchieved?: boolean, lang?: string): Promise<Array<{

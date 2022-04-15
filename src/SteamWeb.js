@@ -26,7 +26,7 @@ class SteamWeb {
 				date: new Date(item.date * 1000),
 				feedName: item.feedname,
 				feedType: item.feed_type,
-				appId: toString(item.appid)
+				appId: item.appid.toString()
 			})
 		})
 		return news
@@ -132,7 +132,7 @@ class SteamWeb {
 		res.friendslist.friends.forEach(user => {
 			friends.push({
 				steamId: user.steamid,
-				friendsSince: user.friend_since === 0 ? undefined : user.friend_since
+				friendsSince: user.friend_since ? new Date(user.friend_since * 1000) : null
 			})
 		})
 		return friends
@@ -194,7 +194,7 @@ class SteamWeb {
 			uID = await idFromUsername(uID)
 		}
 
-		const res = await fetch(this.endpoint + `IPlayerService/GetOwnedGames/v0002/?key=${this.key}&steamid=${uID}&include_appinfo=${includeAppInfo}&include_played_free_games=${includeFreeGames}`).then(response => { return response.json() })
+		const res = await fetch(this.endpoint + `IPlayerService/GetOwnedGames/v0001/?key=${this.key}&steamid=${uID}&include_appinfo=${includeAppInfo}&include_played_free_games=${includeFreeGames}`).then(response => { return response.json() })
 
 		if (!res.response || res.response.game_count === 0) return false
 
