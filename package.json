@@ -17,9 +17,9 @@
 	"author": "AngelCMHxD",
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/AngelCMHxD/steamweb/issues"
+		"url": "https://github.com/AngelCMHxD/steamweb.js/issues"
 	},
-	"homepage": "https://github.com/AngelCMHxD/steamweb#readme",
+	"homepage": "https://github.com/AngelCMHxD/steamweb.js#readme",
 	"dependencies": {
 		"node-fetch": "^2.6.7",
 		"xml-js": "^1.6.11"
