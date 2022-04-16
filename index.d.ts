@@ -8,13 +8,11 @@ declare module "steamweb.js" {
 			gId: string;
 			title: string;
 			url: string;
-			isExternalUrl: boolean;
 			author: string;
 			contents: string;
 			feedLabel: string;
 			date: Date;
 			feedName: string;
-			feedType: number;
 			appId: string;
 		}>>;
 
@@ -23,37 +21,35 @@ declare module "steamweb.js" {
 			percent: number;
 		}>>;
 
-		getPlayerSummaries(userId: string | string[]): Promise<{
+		getPlayerSummaries(userId: string): Promise<{
 			steamId: string;
 			name: string | undefined;
 			profileUrl: string;
 			avatarUrl: string;
 			avatarUrlMedium: string;
 			avatarUrlFull: string;
-			personaState: string;
-			personaHash: string;
+			personaState: "Offline" | "Online" | "Busy" | "Away" | "Snooze" | "Looking to trade" | "Looking to play";
 			realname: string | undefined;
 			primaryClanId: string | undefined;
 			lastLogOff: Date;
 			timeCreated: Date;
-			personaStateFlags: number;
 			locCountryCode: string | undefined;
 			locStateCode: string | undefined;
 			locCityId: number | undefined;
-		} | Array<{
+		}>;
+
+		getPlayersSummaries(userId: string[]): Promise<Array<{
 			steamId: string;
 			name: string | undefined;
 			profileUrl: string;
 			avatarUrl: string;
 			avatarUrlMedium: string;
 			avatarUrlFull: string;
-			personaState: string;
-			personaHash: string;
+			personaState: "Offline" | "Online" | "Busy" | "Away" | "Snooze" | "Looking to trade" | "Looking to play";
 			realname: string | undefined;
 			primaryClanId: string | undefined;
 			lastLogOff: Date;
 			timeCreated: Date;
-			personaStateFlags: number;
 			locCountryCode: string | undefined;
 			locStateCode: string | undefined;
 			locCityId: number | undefined;
@@ -104,6 +100,10 @@ declare module "steamweb.js" {
 				playtimeLinuxForever: game.playtime_linux_forever;
 			}>
 		}>;
+
+		convertUsernameToId(username: string): Promise<string>;
+
+		convertIdToUsername(userId: string): Promise<string>;
 
 	}
 }

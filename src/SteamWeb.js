@@ -19,13 +19,11 @@ class SteamWeb {
 				gId: item.gid,
 				title: item.title,
 				url: item.url,
-				isExternalUrl: item.is_external_url,
-				author: item.author,
+				author: item.author ? item.author : null,
 				contents: item.contents,
 				feedLabel: item.feedlabel,
 				date: new Date(item.date * 1000),
 				feedName: item.feedname,
-				feedType: item.feed_type,
 				appId: item.appid.toString()
 			})
 		})
@@ -50,68 +48,55 @@ class SteamWeb {
 	}
 
 	async getPlayerSummaries(userId) {
+		if (typeof userId !== "string") throw new TypeError(`Expected "string", got "${typeof userId}"`)
+		const r = await this.getPlayersSummaries([userId])
+		return r[0]
+	}
 
-		if (typeof userId === "string") {
-			let uID = userId
-			if (isNaN(parseInt(uID))) {
-				uID = await idFromUsername(uID)
+	async getPlayersSummaries(userId) {
+
+		if (!Array.isArray(userId)) throw new TypeError(`Expected "string[]", got "${typeof userId}"`)
+		if (userId.length === 0) throw new TypeError(`Expected "string[]", got "any[]"`)
+		if (typeof userId[0] !== "string") throw new TypeError(`Expected "string[]", got "${typeof userId[0]}[]"`)
+
+		var idArray = []
+		for (let item in userId) {
+			if (!isNaN(parseInt(userId[item]))) await idArray.push(userId[item])
+			else {
+				let id = await idFromUsername(userId[item])
+				await idArray.push(id)
 			}
-			const res = await fetch(this.endpoint + `ISteamUser/GetPlayerSummaries/v0002/?key=${this.key}&steamids=${uID}`).then(response => { return response.json() })
-			let player = res.response.players[0]
-			return {
+
+		}
+		const res = await fetch(this.endpoint + `ISteamUser/GetPlayerSummaries/v0002/?key=${this.key}&steamids=${idArray}`).then(response => { return response.json() })
+		let players = [];
+		res.response.players.forEach(player => {
+			let state = "";
+			if (player.personastate === 0) state = "Offline"
+			else if (player.personastate === 1) state = "Online"
+			else if (player.personastate === 2) state = "Busy"
+			else if (player.personastate === 3) state = "Away"
+			else if (player.personastate === 4) state = "Snooze"
+			else if (player.personastate === 5) state = "Looking to trade"
+			else if (player.personastate === 6) state = "Looking to play"
+			players.push({
 				steamId: player.steamid,
 				name: player.personaname,
 				profileUrl: player.profileurl,
 				avatarUrl: player.avatar,
 				avatarUrlMedium: player.avatarmedium,
 				avatarUrlFull: player.avatarfull,
-				personaState: player.personastate,
-				personaHash: player.personahash,
+				personaState: state,
 				realname: player.realname,
 				primaryClanId: player.primaryclanid,
 				lastLogOff: player.lastlogoff ? new Date(player.lastlogoff * 1000) : undefined,
 				timeCreated: player.timecreated ? new Date(player.timecreated * 1000) : undefined,
-				personaStateFlags: player.personastateflags,
 				locCountryCode: player.loccountrycode,
 				locStateCode: player.locstatecode,
 				locCityId: player.loccityid,
-			}
-		} else if (typeof userId === "object" && checkArray(userId)) {
-			var idArray = []
-			for (let item in userId) {
-				if (!isNaN(parseInt(userId[item]))) await idArray.push(userId[item])
-				else {
-					let id = await idFromUsername(userId[item])
-					await idArray.push(id)
-				}
-
-			}
-			const res = await fetch(this.endpoint + `ISteamUser/GetPlayerSummaries/v0002/?key=${this.key}&steamids=${idArray}`).then(response => { return response.json() })
-			let players = [];
-			res.response.players.forEach(player => {
-				players.push({
-					steamId: player.steamid,
-					name: player.personaname,
-					profileUrl: player.profileurl,
-					avatarUrl: player.avatar,
-					avatarUrlMedium: player.avatarmedium,
-					avatarUrlFull: player.avatarfull,
-					personaState: player.personastate,
-					personaHash: player.personahash,
-					realname: player.realname,
-					primaryClanId: player.primaryclanid,
-					lastLogOff: player.lastlogoff ? new Date(player.lastlogoff * 1000) : undefined,
-					timeCreated: player.timecreated ? new Date(player.timecreated * 1000) : undefined,
-					personaStateFlags: player.personastateflags,
-					locCountryCode: player.loccountrycode,
-					locStateCode: player.locstatecode,
-					locCityId: player.loccityid,
-				})
 			})
-			return players
-		} else {
-			throw new TypeError(`Expected "string | string[]", got "${typeof userId}"`)
-		}
+		})
+		return players
 
 	}
 
@@ -179,7 +164,17 @@ class SteamWeb {
 		}
 
 		const res = await fetch(this.endpoint + `ISteamUserStats/GetUserStatsForGame/v0002/?appid=${appId}&key=${this.key}&steamid=${uID}`).then(response => { return response.json() })
-		return res.playerstats.stats
+		let stats = [];
+		res.playerstats.stats.forEach(stat => {
+			stats.push({
+				name: stat.name,
+				value: stat.value
+			})
+		})
+		return {
+			gameName: res.playerstats.gameName,
+			stats
+		}
 
 	}
 
@@ -230,7 +225,7 @@ class SteamWeb {
 
 		const res = await fetch(this.endpoint + `IPlayerService/GetRecentlyPlayedGames/v0001/?key=${this.key}&steamid=${uID}${typeof count !== "undefined" ? "&count=" + count : ""}`).then(response => { return response.json() })
 
-		if (!res.response || res.response.total_count === 0) return false
+		if (!res.response || res.response.total_count === 0 || Object.keys(res.response).length === 0) return false
 
 		let games = [];
 		res.response.games.forEach(game => {
@@ -252,20 +247,16 @@ class SteamWeb {
 
 	}
 
-}
-
-/**
- * @private
- * @param {object} arr
- * @returns {boolean}
- */
-function checkArray(arr) {
-	try {
-		arr[0]
-		return true
-	} catch (e) {
-		return false
+	async convertUsernameToId(username) {
+		const id = await idFromUsername(username)
+		return id
 	}
+
+	async convertIdToUsername(userId) {
+		const rq = await this.getPlayerSummaries(id)
+		return rq.name
+	}
+
 }
 
 /**
