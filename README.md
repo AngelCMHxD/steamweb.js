@@ -4,7 +4,6 @@ A package to easily interact with the Steam Web API.
 ### Installation
 ```
 npm i steamweb
-
 ```
 
 ### More info
