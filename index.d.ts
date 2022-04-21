@@ -36,6 +36,7 @@ declare module "steamweb.js" {
 			locCountryCode: string | undefined;
 			locStateCode: string | undefined;
 			locCityId: number | undefined;
+			locCity: string | undefined;
 		}>;
 
 		getPlayersSummaries(userId: string[]): Promise<Array<{

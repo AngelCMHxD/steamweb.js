@@ -1,5 +1,6 @@
 const fetch = require("node-fetch")
 const xmljs = require("xml-js")
+const steamCountries = require("./steamCountries.json")
 
 class SteamWeb {
 
@@ -94,6 +95,7 @@ class SteamWeb {
 				locCountryCode: player.loccountrycode,
 				locStateCode: player.locstatecode,
 				locCityId: player.loccityid,
+				locCity: player.loccountrycode && player.locstatecode && player.loccityid ? steamCountries[player.loccountrycode].states[player.locstatecode].cities[player.loccityid].name : undefined
 			})
 		})
 		return players
