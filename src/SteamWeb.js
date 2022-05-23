@@ -1,6 +1,6 @@
 const fetch = require("node-fetch")
 const xmljs = require("xml-js")
-const steamCountries = require("./steamCountries.json")
+const steamCountries = require("../steam_countries.json")
 
 class SteamWeb {
 

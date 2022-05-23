@@ -1,5 +1,5 @@
 declare module "steamweb.js" {
-	export class SteamWeb {
+	declare class SteamWeb {
 
 		constructor(key: string);
 		private endpoint: string;
@@ -107,4 +107,5 @@ declare module "steamweb.js" {
 		convertIdToUsername(userId: string): Promise<string>;
 
 	}
+	export = SteamWeb;
 }
